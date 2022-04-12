@@ -3,9 +3,15 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <ctime>
+#include <string>
+#include <cstring>
+#include <stdlib.h>
 #include <chrono>
 #include <thread>
-#include<ctime>
+#include <stdio.h>
+#include <errno.h> 
+#include <limits.h>
 #ifndef __has_include
   static_assert(false, "__has_include not supported");
 #else
@@ -20,6 +26,7 @@
      namespace fs = boost::filesystem;
 #  endif
 #endif
+int time_mult;
 bool isNumber(char number[]){
     int i = 0;
     if (number[0] == '-')
@@ -63,13 +70,6 @@ int main(int argc, char** argv){
     callok();std::cout << "<time> is number " <<std::endl<<std::endl;}else{
       callfailed();printf("<time> is not a number");
     callend(1);}
-  if(std::string(argv[2]) == "sec"||"s"){
-    callok();std::cout << "<sec/min/hour> is defined" <<std::endl<<std::endl;
-  }else if(std::string(argv[2]) == "min"||"m"){
-    callok();std::cout << "<sec/min/hour> is defined" <<std::endl<<std::endl;}else if(std::string(argv[2]) == "hour"||"h"){
-    callok();std::cout << "<sec/min/hour> is defined" <<std::endl<<std::endl;}else{
-      callfailed();printf("<sec/min/hour> is not defined");
-    callend(1);}
     if(std::string(argv[3]) == "both"){
     callok();std::cout << "<pull/push/both> is defined" <<std::endl<<std::endl;}else if(std::string(argv[3]) == "pull"){
     callok();std::cout << "<pull/push/both> is defined" <<std::endl<<std::endl;}else if(std::string(argv[3]) == "push"){
@@ -99,6 +99,21 @@ int main(int argc, char** argv){
 #else
     std::system("rm tmp");
 #endif
+  // const char* _UNIXcommand;
+  // strcpy(_UNIXcommand,"sleep ");
+  // strcat(_UNIXcommand,std::string(argv[1]));
+  // std::cout << "Next in " << argv[1] << " sec"<<std::endl;
+char *p;
+    int num;
+    errno = 0;
+    long conv = strtol(argv[1], &p, 10);
+    if (errno != 0 || *p != '\0' || conv > INT_MAX || conv < INT_MIN) {
+        callfailed();printf("<time> is not a number");
+    callend(1);
+    } else {
+        num = conv;
+        printf("%d\n", num);}
+  std::cout << "Next in " << num << " sec"<<std::endl;
   bool start = true;
   while(start){
   time_t t;
@@ -106,12 +121,9 @@ int main(int argc, char** argv){
   time (&t);
   tt = localtime(&t);
   std::cout << "Done at " << asctime(tt) << std::endl;
-#ifdef _WIN32
-    std::system("powershell sleep 2");
-#else
-    std::system("sleep 2");
-#endif
+  std::cout << "Next in " << argv[1] << "sec"<<std::endl;
+  std::this_thread::sleep_for(std::chrono::seconds(num));
+  std::cout << " \x1B[31mError:\033[0m command in process not finished"<<std::endl;
   }
-
 	return 0;
 }
